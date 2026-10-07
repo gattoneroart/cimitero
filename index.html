@@ -5,30 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mappa Interattiva Cimitero Monumentale</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- ======================================================= -->
-    <!-- NUOVI TAG PER TRASFORMARE IL SITO IN UN'APP SU IPHONE    -->
-    <!-- ======================================================= -->
-    <!-- Collega il file di configurazione dell'app -->
     <link rel="manifest" href="manifest.json">
-
-    <!-- Dice all'iPhone di aprire il sito a schermo intero senza barre del browser -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <!-- Definisce lo stile della barra di stato superiore (batteria, orario) -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-    <!-- Il nome che comparirà sotto l'icona nella schermata Home dell'iPhone -->
     <meta name="apple-mobile-web-app-title" content="Monumentale">
-
-    <!-- Associa l'icona che verrà usata sulla Home dell'iPhone -->
-    <link name="apple-touch-icon" href="icon-192.png">
-    <!-- ======================================================= -->
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <div id="app-container">
         <div id="map-wrapper">
-            <object id="mappa-svg" type="image/svg+xml" data="mappa.svg"></object>
+            <!-- La mappa verrà iniettata direttamente qui dentro per non far crashare il telefono -->
+            <div id="contenitore-mappa"></div>
         </div>
     </div>
     <script src="script.js"></script>
