@@ -1,0 +1,45 @@
+/* Reset e Layout dell'applicazione */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff; /* Sfondo bianco puro garantito */
+    font-family: Arial, sans-serif;
+    overflow-x: hidden; /* Evita barre di scorrimento laterali indesiderate */
+}
+
+#app-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Forzatura dell'adattamento rispetto alla larghezza dello schermo */
+#map-wrapper {
+    width: 100vw;
+    position: relative;
+}
+
+#mappa-svg {
+    width: 100%;
+    height: auto; /* Mantiene le proporzioni geometriche native dell'SVG */
+    display: block;
+}
+
+/* Animazione di pulsazione per il Bollo di ritrovamento della tomba */
+@keyframes pulse-bollo {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.bollo-pulse {
+    animation: pulse-bollo 1.5s infinite ease-in-out;
+    transform-origin: center;
+}
