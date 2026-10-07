@@ -1,24 +1,33 @@
-// Attivazione dell'applicazione per il funzionamento offline su iPhone
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Applicazione configurata con successo!'))
-        .catch((err) => console.log('Errore configurazione app:', err));
+        .then(() => console.log('PWA attiva'))
+        .catch((err) => console.log('Errore PWA:', err));
 }
+
 document.addEventListener("DOMContentLoaded", () => {
-    const svgObj = document.getElementById("mappa-svg");
+    const contenitore = document.getElementById("contenitore-mappa");
     let svgDoc = null, dbJSON = [], queryBuffer = "", omoData = null, omoIndex = 0, supVis = false;
 
+    // Carica il database dei defunti
     fetch("dati.json").then(r => r.json()).then(d => dbJSON = d).catch(() => console.log("No JSON"));
 
-    svgObj.addEventListener("load", () => {
-        svgDoc = svgObj.contentDocument;
-        if (svgDoc) {
-            const sup = svgDoc.getElementById("superiore") || svgDoc.getElementById("SUPERIORE");
-            if (sup) { sup.setAttribute("display", "none"); sup.style.setProperty("display", "none", "important"); }
-            attivaInterfaccia();
-        }
-    });
+    // Carica l'SVG direttamente dentro la pagina per evitare i crash su iPhone
+    fetch("mappa.svg")
+        .then(response => response.text())
+        .then(svgTesto => {
+            contenitore.innerHTML = svgTesto;
+            svgDoc = contenitore.querySelector("svg");
+            
+            if (svgDoc) {
+                svgDoc.setAttribute("id", "mappa-svg");
+                const sup = svgDoc.getElementById("superiore") || svgDoc.getElementById("SUPERIORE");
+                if (sup) { sup.setAttribute("display", "none"); sup.style.setProperty("display", "none", "important"); }
+                attivaInterfaccia();
+            }
+        })
+        .catch(err => console.error("Errore caricamento SVG:", err));
 
+    // --- INTERFACCIA TASTIERA ---
     function attivaInterfaccia() {
         const tastiera = svgDoc.getElementById("tastiera");
         if (!tastiera) return;
@@ -81,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (gSpeciale && gSpeciale.id === "risultato" && !omoData) { e.preventDefault(); e.stopPropagation(); resettaMappa(); }
         }, true);
     }
-
     function invertiSup(pSu) {
         supVis = !supVis;
         svgDoc.querySelectorAll("g").forEach(el => {
@@ -107,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let parole = q.toLowerCase().split(/\s+/).filter(p => p.length > 0);
         if (parole.length === 0) return;
 
-        // CORREZIONE: Controlla se la query corrisponde a un ID pulito nell'SVG o ai dati testuali del JSON
         const trovati = dbJSON.filter(item => {
             return parole.every(p => {
                 let nelJson = Object.values(item).join(" ").toLowerCase().includes(p);
@@ -118,18 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
         
-        // Se non trova corrispondenze nel JSON ma l'ID esiste fisicamente nell'SVG, crea un record fittizio al volo per non bloccarsi
         if (trovati.length === 0) {
             let elFisico = svgDoc.getElementById(q.toLowerCase()) || svgDoc.getElementById(q.toUpperCase());
-            if (elFisico) {
-                omoData = null;
-                mostraFinale({ id: q.toLowerCase() });
-                return;
-            }
+            if (elFisico) { omoData = null; mostraFinale({ id: q.toLowerCase() }); return; }
             scriviRis("NESSUN RISULTATO PER: " + q.toUpperCase()); 
         } else if (trovati.length === 1) { 
-            omoData = null; 
-            mostraFinale(trovati[0]); 
+            omoData = null; mostraFinale(trovati[0]); 
         } else {
             omoData = trovati; omoIndex = 0; mostraOmonimoCorrente();
         }
@@ -139,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!omoData || !omoData[omoIndex]) return;
         const trovato = omoData[omoIndex];
         const chiavi = Object.keys(trovato);
-        
         let n = trovato[chiavi.find(k => k.toLowerCase() === "nascita")] || "";
         let m = trovato[chiavi.find(k => k.toLowerCase() === "morte")] || "";
         let id = String(trovato[chiavi.find(k => k.toLowerCase().includes("codice") || k.toLowerCase().includes("pos") || k.toLowerCase().includes("id")) || chiavi[chiavi.length - 1]]).trim().toLowerCase();
